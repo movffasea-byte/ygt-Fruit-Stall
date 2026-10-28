@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
+import CartDrawer, { MobileCartBar } from "@/components/CartDrawer";
+import { ToastProvider } from "@/components/Toast";
 import { CartProvider } from "@/lib/cart";
 
 const geistSans = Geist({
@@ -28,8 +30,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <CartProvider>
-          <Header />
-          {children}
+          <ToastProvider>
+            <Header />
+            {children}
+            <CartDrawer />
+            <MobileCartBar />
+          </ToastProvider>
         </CartProvider>
       </body>
     </html>

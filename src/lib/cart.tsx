@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useSyncExternalStore } from "react";
+import { createContext, useCallback, useContext, useMemo, useState, useSyncExternalStore } from "react";
 
 export type CartItem = {
   key: string; // `${productId}|${size}`
@@ -13,9 +13,11 @@ export type CartItem = {
 type CartContextValue = {
   items: CartItem[];
   count: number;
-  addItem: (item: Omit<CartItem, "qty">) => void;
+  addItem: (item: Omit<CartItem, "qty">, qty?: number) => void;
   setQty: (key: string, qty: number) => void;
   clear: () => void;
+  drawerOpen: boolean;
+  setDrawerOpen: (open: boolean) => void;
 };
 
 const STORAGE_KEY = "yandaki-cart";
@@ -63,13 +65,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const raw = useSyncExternalStore(subscribe, read, () => EMPTY);
   const items = useMemo(() => parse(raw), [raw]);
 
-  const addItem = useCallback((item: Omit<CartItem, "qty">) => {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const addItem = useCallback((item: Omit<CartItem, "qty">, qty = 1) => {
     const current = parse(read());
     const existing = current.find((i) => i.key === item.key);
     write(
       existing
-        ? current.map((i) => (i.key === item.key ? { ...i, qty: i.qty + 1 } : i))
-        : [...current, { ...item, qty: 1 }],
+        ? current.map((i) => (i.key === item.key ? { ...i, qty: i.qty + qty } : i))
+        : [...current, { ...item, qty }],
     );
   }, []);
 
@@ -81,8 +85,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const clear = useCallback(() => write([]), []);
 
   const value = useMemo(
-    () => ({ items, count: items.reduce((n, i) => n + i.qty, 0), addItem, setQty, clear }),
-    [items, addItem, setQty, clear],
+    () => ({ items, count: items.reduce((n, i) => n + i.qty, 0), addItem, setQty, clear, drawerOpen, setDrawerOpen }),
+    [items, addItem, setQty, clear, drawerOpen],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

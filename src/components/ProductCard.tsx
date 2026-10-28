@@ -3,32 +3,53 @@
 import Image from "next/image";
 import { useState } from "react";
 import { formatPrice, type Product } from "@/data/products";
+import { useToast } from "@/components/Toast";
 import { useCart } from "@/lib/cart";
 
 export default function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart();
   const [index, setIndex] = useState(0);
-  const [added, setAdded] = useState(false);
+  const [qty, setQty] = useState(1);
+  const [zoomed, setZoomed] = useState(false);
+  const toast = useToast();
   const variant = product.variants[index];
 
   function add() {
-    addItem({
-      key: `${product.id}|${variant.size}`,
-      name: product.name,
-      size: variant.size,
-      price: variant.price,
-    });
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1200);
+    addItem(
+      {
+        key: `${product.id}|${variant.size}`,
+        name: product.name,
+        size: variant.size,
+        price: variant.price,
+      },
+      qty,
+    );
+    toast(`Added ${qty} × ${product.name} to your cart`);
+    setQty(1);
   }
 
   return (
     <article
-      className={`flex flex-col rounded-lg border border-brand-green/20 bg-white p-4 shadow-sm ${
+      className={`flex flex-col rounded-lg border border-brand-green/20 bg-white p-4 shadow-sm transition hover:shadow-md ${
         product.available ? "" : "opacity-60"
       }`}
     >
       <div className="relative mb-3 aspect-[4/3] overflow-hidden rounded bg-white">
+        <span
+          className={`absolute left-0 top-0 z-10 rounded-br px-2 py-0.5 text-xs font-semibold ${
+            product.available ? "bg-brand-green text-white" : "bg-brand-red text-white"
+          }`}
+        >
+          {product.available ? "Fresh today" : "Sold out"}
+        </span>
+        {product.image && (
+          <button
+            type="button"
+            onClick={() => setZoomed(true)}
+            aria-label={`View ${product.name} larger`}
+            className="absolute inset-0 z-[5] cursor-zoom-in"
+          />
+        )}
         <Image
           src={product.image ?? "/brand/logo.jpg"}
           alt={product.image ? product.name : ""}
@@ -62,17 +83,50 @@ export default function ProductCard({ product }: { product: Product }) {
 
       <div className="mt-auto pt-4">
         {product.available ? (
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                aria-label="Decrease quantity"
+                onClick={() => setQty((q) => Math.max(1, q - 1))}
+                className="h-9 w-9 rounded-full border border-brand-green/40 text-lg leading-none text-brand-green"
+              >
+                −
+              </button>
+              <span className="w-5 text-center font-semibold">{qty}</span>
+              <button
+                type="button"
+                aria-label="Increase quantity"
+                onClick={() => setQty((q) => q + 1)}
+                className="h-9 w-9 rounded-full border border-brand-green/40 text-lg leading-none text-brand-green"
+              >
+                +
+              </button>
+            </div>
           <button
             type="button"
             onClick={add}
-            className="w-full rounded-full bg-brand-red px-4 py-2 font-semibold text-white"
+            className="flex-1 rounded-full bg-brand-red px-4 py-2 font-semibold text-white transition active:scale-95"
           >
-            {added ? "Added" : "Add to cart"}
+            Add to cart
           </button>
+          </div>
         ) : (
           <p className="text-sm font-semibold text-brand-red">Currently unavailable</p>
         )}
       </div>
+      {zoomed && product.image && (
+        <div
+          role="dialog"
+          aria-label={product.name}
+          onClick={() => setZoomed(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+        >
+          <div className="relative h-[80vh] w-full max-w-2xl">
+            <Image src={product.image} alt={product.name} fill sizes="90vw" className="object-contain" />
+          </div>
+        </div>
+      )}
     </article>
   );
 }
