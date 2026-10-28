@@ -32,8 +32,10 @@ export default function CartPage() {
     }
     setError("");
     setSending(true);
-    const url = buildWhatsAppUrl(items, form);
-    const saved = await saveOrder(items, form);
+    // Customers can't read orders back, so the id is made here; it doubles as the tracking token.
+    const id = crypto.randomUUID();
+    const saved = await saveOrder(items, form, id);
+    const url = buildWhatsAppUrl(items, form, saved ? `${window.location.origin}/track/${id}` : undefined);
     if (saved) clear();
     // Same-tab navigation: a new window opened after an await is blocked on many phones.
     window.location.assign(url);

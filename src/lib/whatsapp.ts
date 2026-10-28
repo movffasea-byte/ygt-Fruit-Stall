@@ -23,10 +23,9 @@ export function cartTotal(items: CartItem[]) {
 
 // Saves the order so staff can see it in the admin. Returns false on failure; the caller
 // still sends the WhatsApp message so the customer's order is never lost.
-export async function saveOrder(items: CartItem[], d: OrderDetails): Promise<boolean> {
+export async function saveOrder(items: CartItem[], d: OrderDetails, id: string): Promise<boolean> {
   try {
     const supabase = createClient();
-    const id = crypto.randomUUID(); // customers can't read orders back, so the id is made here
     const { total, hasUnpriced } = cartTotal(items);
     const { error } = await supabase.from("orders").insert({
       id,
@@ -49,7 +48,7 @@ export async function saveOrder(items: CartItem[], d: OrderDetails): Promise<boo
   }
 }
 
-export function buildWhatsAppUrl(items: CartItem[], d: OrderDetails) {
+export function buildWhatsAppUrl(items: CartItem[], d: OrderDetails, trackUrl?: string) {
   const { total, hasUnpriced } = cartTotal(items);
   const lines = [
     "Hello Yandaki Fruit Stall, I would like to place an order:",
@@ -67,5 +66,6 @@ export function buildWhatsAppUrl(items: CartItem[], d: OrderDetails) {
     `Delivery date: ${d.date}`,
   ];
   if (d.notes.trim()) lines.push(`Notes: ${d.notes.trim()}`);
+  if (trackUrl) lines.push("", `Track my order: ${trackUrl}`);
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
 }
