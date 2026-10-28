@@ -4,13 +4,12 @@ import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/lib/cart";
 import { DELIVERY_CITIES } from "@/lib/config";
-import { buildWhatsAppUrl, cartTotal, type OrderDetails } from "@/lib/whatsapp";
+import { buildWhatsAppUrl, cartTotal, saveOrder, type OrderDetails } from "@/lib/whatsapp";
 
 const field = "mt-1 w-full rounded border border-brand-green/40 bg-white px-3 py-2";
 
 export default function CartPage() {
-  const { items, setQty, clear } = useCart();
-  const [form, setForm] = useState<OrderDetails>({
+  const { items, setQty, clear } = useCart();  const [form, setForm] = useState<OrderDetails>({
     name: "",
     phone: "",
     city: DELIVERY_CITIES[0],
@@ -20,18 +19,24 @@ export default function CartPage() {
   });
   const { total, hasUnpriced } = cartTotal(items);
   const [error, setError] = useState("");
+  const [sending, setSending] = useState(false);
 
   const update = (k: keyof OrderDetails) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (form.date < new Date().toISOString().slice(0, 10)) {
       setError("Please choose today or a later date.");
       return;
     }
     setError("");
-    window.open(buildWhatsAppUrl(items, form), "_blank", "noopener");
+    setSending(true);
+    const url = buildWhatsAppUrl(items, form);
+    const saved = await saveOrder(items, form);
+    if (saved) clear();
+    // Same-tab navigation: a new window opened after an await is blocked on many phones.
+    window.location.assign(url);
   }
 
   if (items.length === 0) {
@@ -107,8 +112,12 @@ export default function CartPage() {
           <textarea value={form.notes} onChange={update("notes")} rows={3} className={field} />
         </label>
 
-        <button type="submit" className="w-full rounded-full bg-brand-green px-6 py-3 text-lg font-semibold text-white">
-          Order on WhatsApp
+        <button
+          type="submit"
+          disabled={sending}
+          className="w-full rounded-full bg-brand-green px-6 py-3 text-lg font-semibold text-white disabled:opacity-60"
+        >
+          {sending ? "Sending..." : "Order on WhatsApp"}
         </button>
         <button type="button" onClick={clear} className="w-full text-sm text-brand-red underline">
           Clear cart
