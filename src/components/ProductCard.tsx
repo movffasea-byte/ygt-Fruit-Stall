@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { formatPrice, type Product } from "@/data/products";
 import { useCart } from "@/lib/cart";
@@ -27,6 +28,15 @@ export default function ProductCard({ product }: { product: Product }) {
         product.available ? "" : "opacity-60"
       }`}
     >
+      <div className="relative mb-3 aspect-[4/3] overflow-hidden rounded bg-white">
+        <Image
+          src={product.image ?? "/brand/logo.jpg"}
+          alt={product.image ? product.name : ""}
+          fill
+          sizes="(min-width: 1024px) 320px, (min-width: 640px) 45vw, 90vw"
+          className={product.image ? "object-contain" : "object-contain p-8 opacity-40"}
+        />
+      </div>
       <h3 className="text-lg font-semibold">{product.name}</h3>
       {product.description && <p className="mt-1 text-sm text-foreground/70">{product.description}</p>}
 
