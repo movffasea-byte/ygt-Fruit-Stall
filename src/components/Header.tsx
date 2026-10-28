@@ -14,6 +14,7 @@ export default function Header() {
       </Link>
       <nav className="flex items-center gap-4 text-sm font-medium">
         <Link href="/shop">Shop</Link>
+        <Link href="/stockists">Stockists</Link>
         <Link href="/cart" className="rounded-full bg-brand-gold px-3 py-1 text-brand-green">
           Cart ({count})
         </Link>
