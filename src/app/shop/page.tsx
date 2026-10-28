@@ -4,7 +4,11 @@ import ProductCard from "@/components/ProductCard";
 import { categories } from "@/data/products";
 import { getProducts } from "@/lib/products";
 
-export const metadata = { title: "Shop | Yandaki Fruit Stall" };
+export const metadata = {
+  title: "Shop",
+  description: "Cold-pressed juices, Greek yoghurt, granola and more. Order online for delivery in Abuja, Kaduna and Kano.",
+  alternates: { canonical: "/shop" },
+};
 
 export default function ShopPage() {
   return (

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "Track your order | Yandaki Fruit Stall", robots: { index: false } };
+export const metadata = { title: "Track your order", robots: { index: false } };
 
 type Tracked = {
   status: "new" | "confirmed" | "delivered" | "cancelled";

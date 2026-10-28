@@ -2,7 +2,7 @@ import Link from "next/link";
 import { stockists } from "@/data/stockists";
 
 export const metadata = {
-  title: "Buy near you | Yandaki Fruit Stall",
+  title: "Buy near you",
   description: "Shops where you can pick up our drinking yoghurt.",
 };
 

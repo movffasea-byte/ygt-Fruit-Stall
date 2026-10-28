@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import { kitchen, reviews, tips } from "@/data/reviews";
+import { SITE_URL } from "@/lib/config";
 
 const heroBottles = [
   { src: "/products/the-quencher.jpg", alt: "The Quencher juice", className: "float-slow" },
@@ -15,6 +16,24 @@ const perks = [
   { title: "Order on WhatsApp", text: "Pick your drinks, we confirm fast." },
 ];
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FoodEstablishment",
+  name: "Yandaki Fruit Stall",
+  description: "Cold-pressed fresh juices, Greek yoghurt, granola and salads, delivered in Abuja, Kaduna and Kano.",
+  url: SITE_URL,
+  image: `${SITE_URL}/opengraph-image.jpg`,
+  telephone: "+2348103440445",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "No. 11 Zuba Road, Off Shooting Range",
+    addressLocality: "Kaduna",
+    addressCountry: "NG",
+  },
+  areaServed: ["Abuja", "Kaduna", "Kano"],
+  servesCuisine: "Juices and healthy food",
+};
+
 function Stars({ count }: { count: number }) {
   return (
     <p aria-label={`${count} out of 5 stars`} className="text-brand-gold">
@@ -27,6 +46,10 @@ function Stars({ count }: { count: number }) {
 export default function Home() {
   return (
     <main className="flex-1">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
       <section className="bg-brand-green text-white">
         <div className="mx-auto grid max-w-5xl items-center gap-8 px-4 py-12 md:grid-cols-2 md:py-20">
           <div className="text-center md:text-left">

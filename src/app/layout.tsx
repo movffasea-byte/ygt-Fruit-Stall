@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import CartDrawer, { MobileCartBar } from "@/components/CartDrawer";
 import { ToastProvider } from "@/components/Toast";
 import { CartProvider } from "@/lib/cart";
+import { SITE_URL } from "@/lib/config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,10 +17,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const description =
+  "Fresh juices, Greek yoghurt, granola and more. Order online for delivery in Abuja, Kaduna and Kano.";
+
 export const metadata: Metadata = {
-  title: "Yandaki Fruit Stall",
-  description:
-    "Fresh juices, Greek yoghurt, granola and more. Order online for delivery in Abuja, Kaduna and Kano.",
+  metadataBase: new URL(SITE_URL),
+  title: { default: "Yandaki Fruit Stall", template: "%s | Yandaki Fruit Stall" },
+  description,
+  openGraph: { type: "website", siteName: "Yandaki Fruit Stall", title: "Yandaki Fruit Stall", description, locale: "en_NG" },
+  twitter: { card: "summary_large_image", title: "Yandaki Fruit Stall", description },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
