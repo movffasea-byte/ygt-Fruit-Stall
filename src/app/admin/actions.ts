@@ -4,6 +4,35 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { ORDER_STATUSES, type OrderStatus } from "./statuses";
 
+export async function updateProduct(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  if (!id || !name) return;
+
+  // Row-level security only lets admins change products.
+  const supabase = await createClient();
+  const { data: current } = await supabase.from("products").select("variants").eq("id", id).maybeSingle();
+  if (!current) return;
+
+  // Sizes stay as they are; only the prices are edited. A blank price means "price on request".
+  const variants = (current.variants as { size: string; price: number | null; fromPrice?: boolean }[]).map((v, i) => {
+    const raw = String(formData.get(`price_${i}`) ?? "").trim();
+    const price = raw === "" ? null : Math.round(Number(raw));
+    return { ...v, price: price !== null && Number.isFinite(price) && price >= 0 ? price : v.price };
+  });
+
+  await supabase
+    .from("products")
+    .update({
+      name,
+      description: String(formData.get("description") ?? "").trim() || null,
+      available: formData.get("available") === "on",
+      variants,
+    })
+    .eq("id", id);
+  revalidatePath("/admin/products");
+}
+
 export async function updateOrderStatus(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "") as OrderStatus;

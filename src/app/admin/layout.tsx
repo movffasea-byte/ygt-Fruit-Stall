@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import SignOutButton from "@/components/SignOutButton";
@@ -35,11 +36,17 @@ async function AdminGate({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <div className="flex items-center justify-between">
-        <p className="text-sm">
-          {profile.full_name ?? user.email} · <span className="font-semibold capitalize">{profile.role}</span>
-        </p>
-        <SignOutButton />
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <nav className="flex gap-4 text-sm font-semibold text-brand-green">
+          <Link href="/admin">Orders</Link>
+          {profile.role === "admin" && <Link href="/admin/products">Products</Link>}
+        </nav>
+        <div className="flex items-center gap-3">
+          <p className="text-sm">
+            {profile.full_name ?? user.email} · <span className="font-semibold capitalize">{profile.role}</span>
+          </p>
+          <SignOutButton />
+        </div>
       </div>
       {children}
     </div>
