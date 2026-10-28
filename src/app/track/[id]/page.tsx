@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
@@ -24,7 +25,15 @@ const steps = [
 const naira = (n: number) => `₦${n.toLocaleString("en-NG")}`;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export default async function TrackPage({ params }: PageProps<"/track/[id]">) {
+export default function TrackPage({ params }: PageProps<"/track/[id]">) {
+  return (
+    <Suspense fallback={<p className="px-4 py-10 text-center">Loading your order...</p>}>
+      <TrackOrder params={params} />
+    </Suspense>
+  );
+}
+
+async function TrackOrder({ params }: { params: PageProps<"/track/[id]">["params"] }) {
   const { id } = await params;
   if (!UUID.test(id)) notFound();
 
