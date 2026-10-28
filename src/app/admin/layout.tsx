@@ -40,6 +40,7 @@ async function AdminGate({ children }: { children: React.ReactNode }) {
         <nav className="flex gap-4 text-sm font-semibold text-brand-green">
           <Link href="/admin">Orders</Link>
           {profile.role === "admin" && <Link href="/admin/products">Products</Link>}
+          {profile.role === "admin" && <Link href="/admin/team">Team</Link>}
         </nav>
         <div className="flex items-center gap-3">
           <p className="text-sm">
