@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,7 +26,11 @@ export async function addTeamMember(formData: FormData) {
   const admin = createAdminClient();
   if (!admin) return;
 
-  const { data, error } = await admin.auth.admin.inviteUserByEmail(email);
+  // Send the invite link back to the site the admin is using, not the default Site URL.
+  const h = await headers();
+  const origin = `${h.get("x-forwarded-proto") ?? "https"}://${h.get("host")}`;
+
+  const { data, error } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo: `${origin}/admin` });
   if (error || !data.user) return;
 
   await admin.from("profiles").upsert({

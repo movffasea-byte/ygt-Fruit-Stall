@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import NewOrderAlert from "@/components/NewOrderAlert";
 import SignOutButton from "@/components/SignOutButton";
 import { createClient } from "@/lib/supabase/server";
 
@@ -49,6 +50,7 @@ async function AdminGate({ children }: { children: React.ReactNode }) {
           <SignOutButton />
         </div>
       </div>
+      <NewOrderAlert userId={user.id} isAdmin={profile.role === "admin"} />
       {children}
     </div>
   );

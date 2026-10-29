@@ -36,7 +36,16 @@ export default function CartPage() {
     const id = crypto.randomUUID();
     const saved = await saveOrder(items, form, id);
     const url = buildWhatsAppUrl(items, form, saved ? `${window.location.origin}/track/${id}` : undefined);
-    if (saved) clear();
+    if (saved) {
+      // Fire and forget: keepalive lets the request finish while the page moves on to WhatsApp.
+      fetch("/api/notify-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+        keepalive: true,
+      }).catch(() => {});
+      clear();
+    }
     // Same-tab navigation: a new window opened after an await is blocked on many phones.
     window.location.assign(url);
   }
