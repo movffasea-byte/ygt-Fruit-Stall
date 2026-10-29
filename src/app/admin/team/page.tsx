@@ -16,7 +16,8 @@ type Member = {
 const field = "mt-1 w-full rounded border border-brand-green/40 bg-white px-3 py-2";
 const button = "rounded bg-brand-green px-4 py-2 text-sm font-semibold text-white";
 
-export default async function AdminTeamPage() {
+export default async function AdminTeamPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const { error } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -38,6 +39,8 @@ export default async function AdminTeamPage() {
         Add staff, set their role and WhatsApp number (with country code, e.g. 2348012345678), and switch who is on duty.
         New orders only go to people who are on duty.
       </p>
+
+      {error && <p className="mt-4 rounded bg-brand-red/10 px-3 py-2 text-sm text-brand-red">{error}</p>}
 
       <ul className="mt-6 space-y-4">
         {members.map((m) => (

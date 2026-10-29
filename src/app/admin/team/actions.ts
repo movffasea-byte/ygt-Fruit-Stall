@@ -2,8 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createPlainClient } from "@supabase/supabase-js";
 
 async function requireAdmin() {
   const supabase = await createClient();
@@ -24,17 +26,29 @@ export async function addTeamMember(formData: FormData) {
   if (!ctx || !email) return;
 
   const admin = createAdminClient();
-  if (!admin) return;
+  if (!admin) redirect("/admin/team?error=Server+key+missing");
 
   // Send the invite link back to the site the admin is using, not the default Site URL.
   const h = await headers();
   const origin = `${h.get("x-forwarded-proto") ?? "https"}://${h.get("host")}`;
 
-  const { data, error } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo: `${origin}/admin` });
-  if (error || !data.user) return;
+  let userId: string | null = null;
+  const invited = await admin.auth.admin.inviteUserByEmail(email, { redirectTo: `${origin}/admin` });
+  if (invited.data.user) {
+    userId = invited.data.user.id;
+  } else {
+    // Removing someone only deletes their team profile, so the login may already exist: reuse it
+    // and email a sign-in link instead of an invite.
+    const { data: list } = await admin.auth.admin.listUsers({ perPage: 1000 });
+    const existing = list?.users.find((u) => u.email?.toLowerCase() === email);
+    if (!existing) redirect(`/admin/team?error=${encodeURIComponent(invited.error?.message ?? "Could not send the invite")}`);
+    userId = existing.id;
+    const plain = createPlainClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!);
+    await plain.auth.signInWithOtp({ email, options: { emailRedirectTo: `${origin}/admin`, shouldCreateUser: false } });
+  }
 
   await admin.from("profiles").upsert({
-    id: data.user.id,
+    id: userId,
     email,
     full_name: String(formData.get("full_name") ?? "").trim() || null,
     role,
