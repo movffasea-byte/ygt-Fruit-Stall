@@ -33,7 +33,7 @@ export async function addTeamMember(formData: FormData) {
   const origin = `${h.get("x-forwarded-proto") ?? "https"}://${h.get("host")}`;
 
   let userId: string | null = null;
-  const invited = await admin.auth.admin.inviteUserByEmail(email, { redirectTo: `${origin}/admin` });
+  const invited = await admin.auth.admin.inviteUserByEmail(email, { redirectTo: `${origin}/set-password` });
   if (invited.data.user) {
     userId = invited.data.user.id;
   } else {
@@ -44,7 +44,7 @@ export async function addTeamMember(formData: FormData) {
     if (!existing) redirect(`/admin/team?error=${encodeURIComponent(invited.error?.message ?? "Could not send the invite")}`);
     userId = existing.id;
     const plain = createPlainClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!);
-    await plain.auth.signInWithOtp({ email, options: { emailRedirectTo: `${origin}/admin`, shouldCreateUser: false } });
+    await plain.auth.signInWithOtp({ email, options: { emailRedirectTo: `${origin}/set-password`, shouldCreateUser: false } });
   }
 
   await admin.from("profiles").upsert({
