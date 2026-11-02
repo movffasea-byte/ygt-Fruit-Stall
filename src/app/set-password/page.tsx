@@ -13,6 +13,7 @@ export default function SetPasswordPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -59,7 +60,17 @@ export default function SetPasswordPage() {
       <form onSubmit={submit} className="mt-6 space-y-4">
         <label className="block">
           New password
-          <input required type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} className={field} />
+          <div className="relative">
+            <input required type={showPassword ? "text" : "password"} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} className={`${field} pr-16`} />
+            <button
+              type="button"
+              onClick={() => setShowPassword((s) => !s)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute inset-y-0 right-0 mt-1 px-3 text-sm font-semibold text-brand-green"
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
         </label>
         {error && <p className="text-sm text-brand-red">{error}</p>}
         <button type="submit" disabled={busy} className="w-full rounded-full bg-brand-green px-6 py-3 font-semibold text-white disabled:opacity-60">

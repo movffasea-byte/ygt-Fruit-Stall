@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [info, setInfo] = useState("");
 
   async function submit(e: React.FormEvent) {
@@ -53,7 +54,17 @@ export default function LoginPage() {
         </label>
         <label className="block">
           Password
-          <input required type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className={field} />
+          <div className="relative">
+            <input required type={showPassword ? "text" : "password"} autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className={`${field} pr-16`} />
+            <button
+              type="button"
+              onClick={() => setShowPassword((s) => !s)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute inset-y-0 right-0 mt-1 px-3 text-sm font-semibold text-brand-green"
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
         </label>
         {error && <p className="text-sm text-brand-red">{error}</p>}
         {info && <p className="text-sm text-brand-green">{info}</p>}
